@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autodiagnostic — Communication Managériale</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Montserrat', sans-serif; background: #f4f6f9; min-height: 100vh; }
+    .container { max-width: 820px; margin: 0 auto; background: white; box-shadow: 0 4px 24px rgba(29,48,88,0.10); border-radius: 14px; overflow: hidden; margin-top: 24px; margin-bottom: 40px; }
+
+    /* TABS */
+    .tabs { display: flex; border-bottom: 2px solid #1D3058; background: #fff; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 14px 20px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600;
+      color: #1D3058; background: transparent; border: none; cursor: pointer;
+      border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; letter-spacing: 0.3px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn.active { border-bottom-color: #00BCD4; color: #00BCD4; background: #f0fbfd; }
+    .tab-btn:hover:not(.active) { background: #f5f7fa; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* PAGE 1 - INTRO */
+    .hero { background: #1D3058; padding: 40px 36px 32px; color: white; }
+    .hero-badge { display: inline-block; background: #00BCD4; color: white; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; padding: 5px 14px; border-radius: 20px; margin-bottom: 16px; text-transform: uppercase; }
+    .hero h1 { font-size: 24px; font-weight: 700; line-height: 1.3; margin-bottom: 10px; }
+    .hero p { font-size: 13px; color: #b8cde8; font-weight: 300; line-height: 1.7; }
+    .intro-body { padding: 32px 36px; }
+    .intro-body h2 { font-size: 15px; font-weight: 700; color: #1D3058; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+    .intro-body h2::before { content: ''; display: inline-block; width: 4px; height: 20px; background: #00BCD4; border-radius: 2px; flex-shrink: 0; }
+    .intro-body p { font-size: 13px; color: #444; line-height: 1.85; margin-bottom: 18px; }
+    .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 22px 0; }
+    .pillar-card { background: #f5f8fc; border: 0.5px solid #d0dce8; border-radius: 10px; padding: 18px; }
+    .pillar-card .pillar-icon { font-size: 22px; color: #00BCD4; margin-bottom: 10px; display: block; }
+    .pillar-card h3 { font-size: 12px; font-weight: 700; color: #1D3058; margin-bottom: 6px; }
+    .pillar-card p { font-size: 11px; color: #666; line-height: 1.65; }
+    .instructions-box { background: #e8f4fd; border-left: 4px solid #1D3058; border-radius: 0 10px 10px 0; padding: 18px 22px; margin-top: 22px; }
+    .instructions-box h3 { font-size: 13px; font-weight: 700; color: #1D3058; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .instructions-box ul { list-style: none; padding: 0; }
+    .instructions-box li { font-size: 12px; color: #333; padding: 5px 0; display: flex; gap: 10px; align-items: flex-start; line-height: 1.6; }
+    .instructions-box li::before { content: '→'; color: #00BCD4; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .intro-cta { padding: 0 36px 28px; }
+
+    /* PAGE 2 - QUIZ */
+    .quiz-header { background: #1D3058; padding: 22px 32px; display: flex; align-items: center; justify-content: space-between; }
+    .quiz-header h2 { font-size: 15px; font-weight: 700; color: white; }
+    .progress-info { font-size: 11px; color: #b8cde8; font-weight: 500; }
+    .progress-bar-wrap { background: rgba(29,48,88,0.15); height: 5px; }
+    .progress-bar { background: #00BCD4; height: 5px; transition: width 0.4s; width: 0%; }
+    .dimensions-nav { display: flex; gap: 8px; padding: 14px 32px; flex-wrap: wrap; border-bottom: 0.5px solid #e0e8f0; background: #fafbfc; }
+    .dim-btn { font-size: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; padding: 6px 12px; border-radius: 20px; border: 1px solid #d0dce8; background: white; color: #888; cursor: pointer; transition: all 0.2s; }
+    .dim-btn.active { background: #1D3058; color: white; border-color: #1D3058; }
+    .dim-btn.done { background: #e6f9f4; color: #0F6E56; border-color: #9FE1CB; }
+    .questions-area { padding: 24px 32px; min-height: 420px; }
+    .dim-title { font-size: 14px; font-weight: 700; color: #1D3058; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .dim-desc { font-size: 11px; color: #888; margin-bottom: 22px; }
+    .scale-hint { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .scale-hint span { font-size: 10px; color: #aaa; }
+    .question-item { background: white; border: 0.5px solid #e0e8f0; border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; transition: border-color 0.2s, background 0.2s; }
+    .question-item.answered { border-color: #9FE1CB; background: #f9fefc; }
+    .q-text { font-size: 13px; font-weight: 500; color: #1D3058; margin-bottom: 16px; line-height: 1.65; display: flex; gap: 10px; align-items: flex-start; }
+    .q-num { display: inline-flex; align-items: center; justify-content: center; background: #1D3058; color: white; font-size: 10px; font-weight: 700; width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; }
+    .likert { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .likert input[type=radio] { display: none; }
+    .likert label { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #d0dce8; font-size: 13px; font-weight: 600; color: #888; cursor: pointer; transition: all 0.2s; font-family: 'Montserrat', sans-serif; }
+    .likert input[type=radio]:checked + label { background: #1D3058; color: white; border-color: #1D3058; }
+    .likert label:hover { border-color: #00BCD4; color: #00BCD4; }
+    .quiz-nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 32px; border-top: 0.5px solid #e0e8f0; background: #fafbfc; }
+    .btn-primary { background: #1D3058; color: white; border: none; padding: 11px 26px; border-radius: 7px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:hover { background: #162540; }
+    .btn-secondary { background: white; color: #1D3058; border: 1.5px solid #1D3058; padding: 11px 26px; border-radius: 7px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .btn-secondary:hover { background: #f0f3f8; }
+    .btn-submit { background: #00BCD4; color: white; border: none; padding: 12px 34px; border-radius: 7px; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px; transition: background 0.2s; }
+    .btn-submit:hover { background: #00a0b5; }
+
+    /* PAGE 3 - RESULTS */
+    .results-wrap { padding: 32px 36px; }
+    .score-hero { background: #1D3058; border-radius: 12px; padding: 30px; display: flex; align-items: center; gap: 30px; margin-bottom: 28px; }
+    .score-circle { width: 96px; height: 96px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 3px solid #00BCD4; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+    .score-num { font-size: 28px; font-weight: 700; color: white; line-height: 1; }
+    .score-max { font-size: 11px; color: #b8cde8; }
+    .score-info h2 { font-size: 18px; font-weight: 700; color: white; margin-bottom: 8px; }
+    .score-info p { font-size: 12px; color: #b8cde8; line-height: 1.7; }
+    .level-badge { display: inline-block; padding: 5px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-top: 10px; }
+    .dim-results-section h3 { font-size: 14px; font-weight: 700; color: #1D3058; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+    .dim-results-section h3::before { content: ''; display: inline-block; width: 4px; height: 18px; background: #00BCD4; border-radius: 2px; }
+    .dim-result-item { background: white; border: 0.5px solid #e0e8f0; border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+    .dim-result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .dim-result-name { font-size: 12px; font-weight: 700; color: #1D3058; display: flex; align-items: center; gap: 6px; }
+    .bar-wrap { background: #f0f3f8; border-radius: 4px; height: 8px; width: 100%; }
+    .bar-fill { height: 8px; border-radius: 4px; transition: width 1.2s ease; }
+    .bar-label { font-size: 10px; color: #888; margin-top: 5px; }
+    .sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 24px 0; }
+    .sw-card { border-radius: 10px; padding: 18px 20px; }
+    .sw-card.strengths { background: #e6f9f4; border: 0.5px solid #9FE1CB; }
+    .sw-card.weaknesses { background: #fef3e8; border: 0.5px solid #FAC775; }
+    .sw-card h4 { font-size: 12px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .sw-card.strengths h4 { color: #085041; }
+    .sw-card.weaknesses h4 { color: #633806; }
+    .sw-card ul { list-style: none; padding: 0; }
+    .sw-card li { font-size: 11px; padding: 4px 0; display: flex; gap: 8px; line-height: 1.6; }
+    .sw-card.strengths li { color: #0F6E56; }
+    .sw-card.weaknesses li { color: #854F0B; }
+    .results-note { font-size: 11px; color: #999; line-height: 1.7; padding: 16px 0; border-top: 0.5px solid #e0e8f0; margin-top: 8px; }
+    .placeholder-msg { text-align: center; padding: 70px 24px; color: #aaa; }
+    .placeholder-msg i { font-size: 44px; margin-bottom: 18px; display: block; }
+    .placeholder-msg p { font-size: 13px; margin-bottom: 20px; }
+
+    /* PAGE 4 - ACTION PLAN */
+    .plan-wrap { padding: 32px 36px; }
+    .plan-intro { background: #f5f8fc; border-radius: 10px; padding: 20px 22px; margin-bottom: 28px; border-left: 4px solid #1D3058; }
+    .plan-intro p { font-size: 12px; color: #444; line-height: 1.8; }
+    .action-dimension { margin-bottom: 28px; }
+    .action-dimension h3 { font-size: 13px; font-weight: 700; color: #1D3058; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .action-card { background: white; border: 0.5px solid #e0e8f0; border-radius: 10px; padding: 18px 22px; }
+    .action-card .action-level { font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 12px; display: inline-block; margin-bottom: 10px; letter-spacing: 0.3px; }
+    .action-card .action-title { font-size: 13px; font-weight: 700; color: #1D3058; margin-bottom: 8px; }
+    .action-card .action-desc { font-size: 12px; color: #555; line-height: 1.8; }
+    .action-card .action-timeline { font-size: 11px; color: #00BCD4; font-weight: 600; margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+    .sources-section { border-top: 0.5px solid #e0e8f0; padding-top: 22px; margin-top: 10px; }
+    .sources-section h3 { font-size: 10px; font-weight: 700; color: #aaa; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.8px; }
+    .sources-section p { font-size: 10px; color: #bbb; line-height: 2.0; }
+
+    /* FOOTER */
+    .footer { background: #808080; padding: 16px 36px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .footer-name { font-size: 11px; color: white; font-weight: 600; letter-spacing: 0.3px; }
+    .footer-brand { font-size: 11px; color: rgba(255,255,255,0.75); font-style: italic; font-weight: 600; }
+    .footer-copy { font-size: 10px; color: rgba(255,255,255,0.5); }
+
+    @media (max-width: 600px) {
+      .container { margin: 0; border-radius: 0; }
+      .hero, .intro-body, .intro-cta, .results-wrap, .plan-wrap { padding-left: 20px; padding-right: 20px; }
+      .quiz-header, .questions-area, .quiz-nav, .dimensions-nav { padding-left: 16px; padding-right: 16px; }
+      .sw-grid { grid-template-columns: 1fr; }
+      .score-hero { flex-direction: column; text-align: center; }
+      .footer { flex-direction: column; text-align: center; gap: 4px; }
+      .tab-btn { padding: 10px 12px; font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('intro')"><i class="ti ti-info-circle"></i> Introduction</button>
+    <button class="tab-btn" onclick="switchTab('quiz')"><i class="ti ti-clipboard-list"></i> Autodiagnostic</button>
+    <button class="tab-btn" onclick="switchTab('results')"><i class="ti ti-chart-bar"></i> Analyse</button>
+    <button class="tab-btn" onclick="switchTab('plan')"><i class="ti ti-rocket"></i> Plan d'action</button>
+  </div>
+
+  <!-- ===== ONGLET 1 : INTRODUCTION ===== -->
+  <div id="tab-intro" class="tab-content active">
+    <div class="hero">
+      <div class="hero-badge">Outil de développement professionnel</div>
+      <h1>Autodiagnostic de communication managériale</h1>
+      <p>À destination des cadres de santé et des médecins chefs de service</p>
+    </div>
+    <div class="intro-body">
+      <h2>Objectifs de cet autodiagnostic</h2>
+      <p>Cet outil a été conçu pour vous permettre d'évaluer vos pratiques de communication managériale dans le contexte spécifique des établissements de santé. La communication managériale ne se limite pas à la transmission d'informations : elle constitue un levier stratégique de mobilisation des équipes, de cohérence organisationnelle et de conduite du changement.</p>
+      <p>En répondant sincèrement à ces 20 questions, vous obtiendrez une photographie de vos forces et de vos axes de progression, structurée autour de cinq dimensions clés.</p>
+
+      <h2>Qu'est-ce que la communication managériale ?</h2>
+      <p>Selon l'AFCI, la communication managériale désigne l'ensemble des actes de communication portés par les managers envers leurs équipes : informer, donner du sens, écouter, mobiliser et reconnaître. Elle se distingue de la communication institutionnelle par sa dimension relationnelle et de proximité.</p>
+      <p>Floris (1997) la définit comme un processus de construction du sens dans les organisations, à travers lequel les managers contribuent à créer une culture commune et à orienter les comportements. Dans les établissements de santé, cette dimension prend une acuité particulière : les enjeux humains, la complexité des organisations et la pression des contraintes renforcent la nécessité d'une communication managériale structurée et intentionnelle.</p>
+      <p>Theodossopoulos (2023) souligne que le management de la communication constitue un levier majeur dans les processus de changement organisationnel, en permettant de réduire les résistances et d'ancrer de nouvelles pratiques.</p>
+
+      <div class="pillars">
+        <div class="pillar-card">
+          <i class="ti ti-broadcast pillar-icon"></i>
+          <h3>Transmission de l'information</h3>
+          <p>Clarté, régularité et accessibilité des messages transmis aux équipes.</p>
+        </div>
+        <div class="pillar-card">
+          <i class="ti ti-ear pillar-icon"></i>
+          <h3>Écoute et feedback</h3>
+          <p>Capacité à recueillir et intégrer les retours des collaborateurs.</p>
+        </div>
+        <div class="pillar-card">
+          <i class="ti ti-users pillar-icon"></i>
+          <h3>Mobilisation et sens</h3>
+          <p>Donner du sens, valoriser les contributions, fédérer autour d'objectifs.</p>
+        </div>
+        <div class="pillar-card">
+          <i class="ti ti-arrows-exchange pillar-icon"></i>
+          <h3>Conduite du changement</h3>
+          <p>Accompagner les évolutions organisationnelles par la communication.</p>
+        </div>
+        <div class="pillar-card">
+          <i class="ti ti-award pillar-icon"></i>
+          <h3>Posture et légitimité</h3>
+          <p>Cohérence entre discours et actions, crédibilité managériale.</p>
+        </div>
+      </div>
+
+      <div class="instructions-box">
+        <h3><i class="ti ti-list-check"></i> Comment utiliser cet outil ?</h3>
+        <ul>
+          <li>Répondez seul(e), sans vous conformer à ce que vous pensez être attendu</li>
+          <li>Évaluez chaque affirmation sur une échelle de 1 (jamais) à 5 (toujours)</li>
+          <li>Les résultats sont confidentiels et uniquement à votre usage</li>
+          <li>Prévoyez 10 à 15 minutes pour compléter les 20 questions</li>
+          <li>Consultez ensuite l'onglet « Analyse » pour interpréter vos résultats</li>
+          <li>Construisez votre plan de développement dans l'onglet « Plan d'action »</li>
+        </ul>
+      </div>
+    </div>
+    <div class="intro-cta">
+      <button class="btn-primary" onclick="switchTab('quiz')">Commencer l'autodiagnostic →</button>
+    </div>
+    <div class="footer">
+      <span class="footer-name">Céline Cornet, ingénieure pédagogique</span>
+      <span class="footer-brand">Phosphoria</span>
+      <span class="footer-copy">© 2024</span>
+    </div>
+  </div>
+
+  <!-- ===== ONGLET 2 : AUTODIAGNOSTIC ===== -->
+  <div id="tab-quiz" class="tab-content">
+    <div class="quiz-header">
+      <h2>Autodiagnostic — 20 questions</h2>
+      <span class="progress-info" id="progress-text">0 / 20 questions répondues</span>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="dimensions-nav" id="dims-nav"></div>
+    <div class="questions-area" id="questions-area"></div>
+    <div class="quiz-nav">
+      <button class="btn-secondary" id="btn-prev" onclick="prevDim()" style="display:none">← Précédent</button>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <span id="dim-counter" style="font-size:11px;color:#888;"></span>
+        <button class="btn-primary" id="btn-next" onclick="nextDim()">Suivant →</button>
+        <button class="btn-submit" id="btn-submit" style="display:none" onclick="submitQuiz()">Voir mes résultats ↗</button>
+      </div>
+    </div>
+    <div class="footer">
+      <span class="footer-name">Céline Cornet, ingénieure pédagogique</span>
+      <span class="footer-brand">Phosphoria</span>
+      <span class="footer-copy">© 2024</span>
+    </div>
+  </div>
+
+  <!-- ===== ONGLET 3 : ANALYSE ===== -->
+  <div id="tab-results" class="tab-content">
+    <div class="results-wrap" id="results-content">
+      <div class="placeholder-msg">
+        <i class="ti ti-chart-bar"></i>
+        <p>Complétez l'autodiagnostic pour voir votre analyse personnalisée.</p>
+        <button class="btn-primary" onclick="switchTab('quiz')">Aller à l'autodiagnostic →</button>
+      </div>
+    </div>
+    <div class="footer">
+      <span class="footer-name">Céline Cornet, ingénieure pédagogique</span>
+      <span class="footer-brand">Phosphoria</span>
+      <span class="footer-copy">© 2024</span>
+    </div>
+  </div>
+
+  <!-- ===== ONGLET 4 : PLAN D'ACTION ===== -->
+  <div id="tab-plan" class="tab-content">
+    <div class="plan-wrap" id="plan-content">
+      <div class="placeholder-msg">
+        <i class="ti ti-rocket"></i>
+        <p>Votre plan d'action personnalisé apparaîtra après avoir complété l'autodiagnostic.</p>
+        <button class="btn-primary" onclick="switchTab('quiz')">Aller à l'autodiagnostic →</button>
+      </div>
+    </div>
+    <div class="footer">
+      <span class="footer-name">Céline Cornet, ingénieure pédagogique</span>
+      <span class="footer-brand">Phosphoria</span>
+      <span class="footer-copy">© 2024</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const dimensions = [
+    {
+      id: 'transmission',
+      name: "Transmission de l'information",
+      icon: 'ti-broadcast',
+      desc: "Clarté, régularité et accessibilité des messages transmis aux équipes.",
+      questions: [
+        { id: 1, text: "Je m'assure que les informations stratégiques de l'établissement sont transmises à mon équipe de manière claire et régulière." },
+        { id: 2, text: "J'adapte mon registre de communication (langage, support, canal) selon mon interlocuteur (soignant, administratif, médecin)." },
+        { id: 3, text: "Je veille à ce que mes messages soient exempts d'ambiguïtés et vérifiés dans leur bonne compréhension par l'équipe." },
+        { id: 4, text: "Je donne du sens aux décisions institutionnelles en les contextualisant pour mon équipe." }
+      ]
+    },
+    {
+      id: 'ecoute',
+      name: "Écoute et feedback",
+      icon: 'ti-ear',
+      desc: "Capacité à recueillir, intégrer et valoriser les retours des collaborateurs.",
+      questions: [
+        { id: 5, text: "Je crée des espaces formels et informels permettant à mes collaborateurs de s'exprimer librement." },
+        { id: 6, text: "Lorsqu'un collaborateur me fait un retour négatif, je l'accueille sans défense et je l'intègre à ma réflexion." },
+        { id: 7, text: "Je pratique l'écoute active en reformulant les propos de mes interlocuteurs pour m'assurer de ma bonne compréhension." },
+        { id: 8, text: "Je fournis des retours constructifs et réguliers à mes collaborateurs sur leur travail et leurs pratiques." }
+      ]
+    },
+    {
+      id: 'mobilisation',
+      name: "Mobilisation et sens",
+      icon: 'ti-users',
+      desc: "Donner du sens, valoriser les contributions, fédérer autour d'objectifs communs.",
+      questions: [
+        { id: 9, text: "Je lie explicitement les missions du service aux valeurs et aux orientations de l'établissement de santé." },
+        { id: 10, text: "Je reconnais publiquement les réussites individuelles et collectives au sein de mon équipe." },
+        { id: 11, text: "J'implique mes collaborateurs dans les processus de décision qui les concernent directement." },
+        { id: 12, text: "Je veille à ce que chaque membre de l'équipe comprenne le sens et l'impact de son rôle dans la prise en charge du patient." }
+      ]
+    },
+    {
+      id: 'changement',
+      name: "Conduite du changement",
+      icon: 'ti-arrows-exchange',
+      desc: "Accompagner les évolutions organisationnelles et les résistances par la communication.",
+      questions: [
+        { id: 13, text: "Lorsqu'un changement est annoncé, je l'anticipe en préparant une communication adaptée avant même la mise en œuvre." },
+        { id: 14, text: "Je gère les résistances au changement en les verbalisant et en créant des espaces de dialogue." },
+        { id: 15, text: "Je suis capable de maintenir une communication rassurante et cohérente en période d'incertitude organisationnelle." },
+        { id: 16, text: "Je fais le lien entre les changements locaux du service et les enjeux globaux de l'établissement ou du système de santé." }
+      ]
+    },
+    {
+      id: 'posture',
+      name: "Posture et légitimité",
+      icon: 'ti-award',
+      desc: "Cohérence discours/actions, crédibilité managériale et gestion de la communication institutionnelle.",
+      questions: [
+        { id: 17, text: "Il y a une cohérence entre ce que je dis et ce que je fais : mon comportement reflète les valeurs que je prône." },
+        { id: 18, text: "Je suis à l'aise pour porter des messages institutionnels même lorsqu'ils ne correspondent pas à mes convictions personnelles, tout en restant authentique." },
+        { id: 19, text: "Je me forme ou m'informe régulièrement sur les pratiques de communication managériale (lectures, formations, échanges entre pairs)." },
+        { id: 20, text: "J'ai une vision claire de ma propre identité communicationnelle de manager et je travaille à la faire évoluer." }
+      ]
+    }
+  ];
+
+  let currentDim = 0;
+  let answers = {};
+
+  function switchTab(name) {
+    const tabNames = ['intro', 'quiz', 'results', 'plan'];
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', tabNames[i] === name);
+    });
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+  }
+
+  function buildDimsNav() {
+    const nav = document.getElementById('dims-nav');
+    nav.innerHTML = '';
+    dimensions.forEach((d, i) => {
+      const allAnswered = d.questions.every(q => answers[q.id] !== undefined);
+      const btn = document.createElement('button');
+      btn.className = 'dim-btn' + (i === currentDim ? ' active' : '') + (allAnswered ? ' done' : '');
+      btn.textContent = (i + 1) + '. ' + d.name.split(' ')[0];
+      btn.onclick = () => { currentDim = i; renderQuiz(); };
+      nav.appendChild(btn);
+    });
+  }
+
+  function renderQuiz() {
+    buildDimsNav();
+    const dim = dimensions[currentDim];
+    const area = document.getElementById('questions-area');
+    area.innerHTML = '';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'dim-title';
+    titleEl.innerHTML = '<i class="ti ' + dim.icon + '"></i> ' + dim.name;
+    area.appendChild(titleEl);
+
+    const descEl = document.createElement('div');
+    descEl.className = 'dim-desc';
+    descEl.textContent = dim.desc;
+    area.appendChild(descEl);
+
+    const hint = document.createElement('div');
+    hint.className = 'scale-hint';
+    hint.innerHTML = '<span>1 = Jamais</span><span>3 = Parfois</span><span>5 = Toujours</span>';
+    area.appendChild(hint);
+
+    dim.questions.forEach(q => {
+      const answered = answers[q.id] !== undefined;
+      const div = document.createElement('div');
+      div.className = 'question-item' + (answered ? ' answered' : '');
+      div.id = 'qitem-' + q.id;
+
+      let radioHtml = '<div class="likert">';
+      for (let v = 1; v <= 5; v++) {
+        const checked = answers[q.id] === v ? 'checked' : '';
+        radioHtml += '<input type="radio" name="q' + q.id + '" id="q' + q.id + 'v' + v + '" value="' + v + '" ' + checked + '>';
+        radioHtml += '<label for="q' + q.id + 'v' + v + '">' + v + '</label>';
+      }
+      radioHtml += '</div>';
+
+      div.innerHTML = '<div class="q-text"><span class="q-num">' + q.id + '</span>' + q.text + '</div>' + radioHtml;
+      area.appendChild(div);
+    });
+
+    dim.questions.forEach(q => {
+      for (let v = 1; v <= 5; v++) {
+        const el = document.getElementById('q' + q.id + 'v' + v);
+        if (el) {
+          el.addEventListener('change', function () {
+            answers[q.id] = parseInt(this.value);
+            const item = document.getElementById('qitem-' + q.id);
+            if (item) item.classList.add('answered');
+            updateProgress();
+            buildDimsNav();
+          });
+        }
+      }
+    });
+
+    const isLast = currentDim === dimensions.length - 1;
+    document.getElementById('btn-prev').style.display = currentDim === 0 ? 'none' : 'inline-block';
+    document.getElementById('btn-next').style.display = isLast ? 'none' : 'inline-block';
+    document.getElementById('dim-counter').textContent = 'Dimension ' + (currentDim + 1) + ' / ' + dimensions.length;
+    const allDone = Object.keys(answers).length === 20;
+    document.getElementById('btn-submit').style.display = (isLast && allDone) ? 'inline-block' : 'none';
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const count = Object.keys(answers).length;
+    document.getElementById('progress-text').textContent = count + ' / 20 questions répondues';
+    document.getElementById('progress-bar').style.width = (count / 20 * 100) + '%';
+    const isLast = currentDim === dimensions.length - 1;
+    if (isLast && count === 20) {
+      document.getElementById('btn-submit').style.display = 'inline-block';
+    }
+  }
+
+  function nextDim() { if (currentDim < dimensions.length - 1) { currentDim++; renderQuiz(); } }
+  function prevDim() { if (currentDim > 0) { currentDim--; renderQuiz(); } }
+
+  function getLevel(pct) {
+    if (pct >= 80) return { label: 'Expert', color: '#085041', bg: '#e6f9f4', text: "Votre communication managériale est exemplaire. Vous êtes un acteur de référence pour vos pairs et pouvez accompagner d'autres encadrants." };
+    if (pct >= 60) return { label: 'Confirmé', color: '#1D3058', bg: '#e6f0fb', text: "Vous disposez de pratiques solides et cohérentes. Quelques axes d'approfondissement restent à explorer pour atteindre l'excellence." };
+    if (pct >= 40) return { label: 'En développement', color: '#854F0B', bg: '#fef3e8', text: "Vous avez identifié les enjeux de la communication managériale mais certaines pratiques restent à consolider dans votre quotidien." };
+    return { label: 'À renforcer', color: '#A32D2D', bg: '#fcebeb', text: "Des actions de développement ciblées et structurées vous permettront de progresser rapidement sur les dimensions essentielles." };
+  }
+
+  function getDimLevel(pct) {
+    if (pct >= 80) return { label: 'Fort', color: '#085041', bg: '#e6f9f4', barColor: '#1D9E75' };
+    if (pct >= 60) return { label: 'Bon', color: '#185FA5', bg: '#e6f1fb', barColor: '#378ADD' };
+    if (pct >= 40) return { label: 'Moyen', color: '#854F0B', bg: '#fef3e8', barColor: '#EF9F27' };
+    return { label: 'Faible', color: '#A32D2D', bg: '#fcebeb', barColor: '#E24B4A' };
+  }
+
+  function submitQuiz() {
+    const scores = {};
+    let total = 0;
+    dimensions.forEach(d => {
+      const s = d.questions.reduce((a, q) => a + (answers[q.id] || 0), 0);
+      scores[d.id] = s;
+      total += s;
+    });
+    const pct = Math.round(total / 100 * 100);
+    const level = getLevel(pct);
+
+    const sorted = dimensions.map(d => ({ ...d, score: scores[d.id], pct: Math.round(scores[d.id] / 20 * 100) }))
+      .sort((a, b) => b.score - a.score);
+    const strengths = sorted.slice(0, 2);
+    const weaknesses = sorted.slice(-2).reverse();
+
+    let html = '<div class="score-hero">'
+      + '<div class="score-circle"><div class="score-num">' + total + '</div><div class="score-max">/ 100</div></div>'
+      + '<div class="score-info"><h2>Votre profil de communicant managérial</h2><p>' + level.text + '</p>'
+      + '<span class="level-badge" style="background:' + level.bg + ';color:' + level.color + ';">' + level.label + '</span>'
+      + '</div></div>';
+
+    html += '<div class="dim-results-section"><h3>Résultats par dimension</h3>';
+    dimensions.forEach(d => {
+      const s = scores[d.id];
+      const p = Math.round(s / 20 * 100);
+      const lv = getDimLevel(p);
+      html += '<div class="dim-result-item">'
+        + '<div class="dim-result-header">'
+        + '<div class="dim-result-name"><i class="ti ' + d.icon + '"></i> ' + d.name + '</div>'
+        + '<div style="font-size:13px;font-weight:700;color:#1D3058;">' + s + ' / 20 '
+        + '<span style="font-size:10px;padding:3px 10px;border-radius:10px;background:' + lv.bg + ';color:' + lv.color + ';font-weight:700;margin-left:6px">' + lv.label + '</span></div>'
+        + '</div>'
+        + '<div class="bar-wrap"><div class="bar-fill" style="width:' + p + '%;background:' + lv.barColor + ';"></div></div>'
+        + '<div class="bar-label">' + p + '% de maîtrise</div>'
+        + '</div>';
+    });
+    html += '</div>';
+
+    html += '<div class="sw-grid">'
+      + '<div class="sw-card strengths"><h4><i class="ti ti-star"></i> Points forts</h4><ul>'
+      + strengths.map(d => '<li>✓ ' + d.name + ' (' + d.score + '/20)</li>').join('')
+      + '</ul></div>'
+      + '<div class="sw-card weaknesses"><h4><i class="ti ti-alert-triangle"></i> Axes prioritaires</h4><ul>'
+      + weaknesses.map(d => '<li>→ ' + d.name + ' (' + d.score + '/20)</li>').join('')
+      + '</ul></div></div>';
+
+    html += '<div class="results-note">Interprétation basée sur les travaux de l\'AFCI (2014), Floris (1997), Theodossopoulos (2023) et Talaera (2024).</div>';
+    html += '<div style="margin-top:20px;"><button class="btn-primary" onclick="switchTab(\'plan\')">Voir mon plan d\'action →</button></div>';
+
+    document.getElementById('results-content').innerHTML = html;
+    buildActionPlan(scores);
+    switchTab('results');
+  }
+
+  function buildActionPlan(scores) {
+    const allActions = {
+      transmission: {
+        high: { title: "Devenez ambassadeur de la communication descendante", desc: "Formalisez vos pratiques en créant un guide de communication pour les nouveaux encadrants de votre service. Partagez vos outils (supports de réunion, tableaux de bord visuels) avec vos pairs.", timeline: "À 3 mois", level: 'Valorisation', levelColor: '#085041', levelBg: '#e6f9f4' },
+        low: { title: "Structurer vos canaux d'information", desc: "Établissez un plan de communication hebdomadaire : réunion d'équipe courte (10 min), affichage des informations clés, note synthétique mensuelle. Appuyez-vous sur les ressources de l'AFCI (Le Livre Blanc de la Communication Managériale, 2014) pour outiller vos pratiques.", timeline: "À 1 mois", level: 'Prioritaire', levelColor: '#A32D2D', levelBg: '#fcebeb' }
+      },
+      ecoute: {
+        high: { title: "Ancrer la culture du feedback continu", desc: "Mettez en place un baromètre d'écoute trimestriel. Publiez les résultats et les actions engagées pour montrer la valeur accordée aux retours de l'équipe.", timeline: "À 3 mois", level: 'Valorisation', levelColor: '#085041', levelBg: '#e6f9f4' },
+        low: { title: "Développer l'écoute active au quotidien", desc: "Pratiquez la reformulation systématique lors de vos entretiens. Inspirez-vous des techniques d'écoute active décrites par Talaera (2024) : questions ouvertes, silence, reformulation. Instaurez une \"porte ouverte\" hebdomadaire de 30 minutes.", timeline: "À 2 semaines", level: 'Prioritaire', levelColor: '#A32D2D', levelBg: '#fcebeb' }
+      },
+      mobilisation: {
+        high: { title: "Capitaliser sur votre capacité à mobiliser", desc: "Engagez-vous dans des projets transversaux d'établissement. Devenez référent d'un groupe de travail sur la qualité ou le projet de service. Votre force de mobilisation est un atout institutionnel.", timeline: "À 6 mois", level: 'Valorisation', levelColor: '#085041', levelBg: '#e6f9f4' },
+        low: { title: "Relier missions et sens pour l'équipe", desc: "Lors de chaque réunion, connectez explicitement les tâches aux valeurs soignantes. Organisez un atelier \"sens et missions\" avec votre équipe. Appuyez-vous sur OpenStax (2022) : la communication managériale contribue directement à la réputation et à la cohésion de l'organisation.", timeline: "À 1 mois", level: 'Prioritaire', levelColor: '#A32D2D', levelBg: '#fcebeb' }
+      },
+      changement: {
+        high: { title: "Développer une posture d'agent de changement", desc: "Proposez-vous pour piloter la communication d'un projet institutionnel. Votre capacité d'accompagnement est un levier pour les directions.", timeline: "À 6 mois", level: 'Valorisation', levelColor: '#085041', levelBg: '#e6f9f4' },
+        low: { title: "Préparer un plan de communication pour chaque changement", desc: "Avant toute réforme, construisez un plan en 3 étapes : annonce / explication / suivi. Référez-vous aux travaux de Theodossopoulos (2023) : le management de la communication réduit les résistances et favorise l'appropriation des nouvelles pratiques organisationnelles.", timeline: "À 1 mois", level: 'Prioritaire', levelColor: '#A32D2D', levelBg: '#fcebeb' }
+      },
+      posture: {
+        high: { title: "Documenter et transmettre votre identité communicationnelle", desc: "Rédigez votre charte de communication managériale. Partagez votre expérience dans des groupes de pairs ou lors de formations en interne.", timeline: "À 6 mois", level: 'Valorisation', levelColor: '#085041', levelBg: '#e6f9f4' },
+        low: { title: "Clarifier et aligner votre posture managériale", desc: "Participez à une formation en communication managériale. Travaillez sur la cohérence discours/actes avec un pair ou un superviseur. Journaleska (2019) rappelle l'importance de l'authenticité dans la \"parole managériale\" pour éviter la normalisation artificielle des discours qui fragilise la légitimité du manager.", timeline: "À 2 mois", level: 'Prioritaire', levelColor: '#A32D2D', levelBg: '#fcebeb' }
+      }
+    };
+
+    let html = '<div class="plan-intro"><p><strong>Votre plan d\'action personnalisé</strong> est construit à partir de vos résultats. Il identifie pour chaque dimension une action prioritaire à mettre en œuvre, ainsi qu\'une action de valorisation de vos points forts. Les délais indicatifs sont donnés à titre de repère.</p></div>';
+
+    dimensions.forEach(d => {
+      const s = scores[d.id];
+      const p = Math.round(s / 20 * 100);
+      const action = p >= 60 ? allActions[d.id].high : allActions[d.id].low;
+      html += '<div class="action-dimension">'
+        + '<h3><i class="ti ' + d.icon + '"></i> ' + d.name + '</h3>'
+        + '<div class="action-card">'
+        + '<span class="action-level" style="background:' + action.levelBg + ';color:' + action.levelColor + ';">' + action.level + '</span>'
+        + '<div class="action-title">' + action.title + '</div>'
+        + '<div class="action-desc">' + action.desc + '</div>'
+        + '<div class="action-timeline"><i class="ti ti-clock"></i> ' + action.timeline + '</div>'
+        + '</div></div>';
+    });
+
+    html += '<div class="sources-section"><h3>Références bibliographiques</h3><p>'
+      + 'AFCI. (2014). <em>Le livre blanc de la communication managériale.</em> afci.asso.fr<br>'
+      + 'Floris, B. (1997). <em>La communication managériale.</em> Presses Universitaires de France. journals.openedition.org<br>'
+      + 'OpenStax. (2022). Communication managériale et réputation de l\'entreprise. LibreTexts.<br>'
+      + 'Theodossopoulos, G. (2023). L\'apport du management de la communication dans le changement organisationnel. ASJP.<br>'
+      + 'Journaleska. (2019). Fabrication, diffusion et normalisation de la "parole" managériale.<br>'
+      + 'Talaera. (2024). 21 leadership communication skills every manager should master.<br>'
+      + 'Les Roches. (2024). Communication skills for managers. lesroches.edu<br>'
+      + 'EM Lyon Business School. (2024). What does a communication manager do?'
+      + '</p></div>';
+
+    document.getElementById('plan-content').innerHTML = html;
+  }
+
+  renderQuiz();
+</script>
+</body>
+</html>
